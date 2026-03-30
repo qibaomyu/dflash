@@ -40,7 +40,7 @@ https://github.com/user-attachments/assets/5b29cabb-eb95-44c9-8ffe-367c0758de8c
 
 ### Installation
 ```bash
-conda create -n dflash python=3.11
+conda create -n dflash python=3.12
 conda activate dflash
 
 git clone https://github.com/z-lab/dflash.git
@@ -76,8 +76,13 @@ python -m sglang.launch_server \
 ```
 
 ### vLLM
-
-Community-contributed support is available. See PRs [#36847](https://github.com/vllm-project/vllm/pull/36847) and [#36767](https://github.com/vllm-project/vllm/pull/36767) for details.
+Please install the latest vLLM from source.
+```bash
+vllm serve Qwen/Qwen3.5-27B \
+  --speculative-config '{"method": "dflash", "model": "z-lab/Qwen3.5-27B-DFlash", "num_speculative_tokens": 15}' \
+  --attention-backend flash_attn \
+  --max-num-batched-tokens 32768
+```
 
 ### Transformers
 Only Qwen3 and LLaMA-3.1 models support Transformers backend.
@@ -123,7 +128,7 @@ print(tokenizer.decode(generate_ids[0], skip_special_tokens=False))
 ```
 
 ## 📊 Evaluation
-We provide scripts to reproduce the speedup and acceptance length metrics in the paper. The reported results were tested on NVIDIA H200 or B200 GPUs. Please note that only Qwen3 series and LLaMA-3.1 models support Transformers backend benchmark. For other models please use SGLang to run the benchmarks.
+We provide scripts to reproduce the speedup and acceptance length metrics in the paper. The reported results were tested on NVIDIA H200 or B200 GPUs. **Please note that only Qwen3 series and LLaMA-3.1 models support Transformers backend benchmark. For other models please use SGLang to run the benchmarks.**
 
 To run benchmark on Transformers backend:
 ```bash
@@ -135,13 +140,28 @@ To run benchmark on SGLang:
 bash run_sglang_benchmark.sh
 ```
 
-<div align="center">
+To run benchmark on vLLM, first launch the server, then run:
+```bash
+vllm bench serve \
+  --backend openai-chat \
+  --base-url http://127.0.0.1:8000 \
+  --endpoint /v1/chat/completions \
+  --dataset-name custom \
+  --dataset-path ./humaneval.jsonl \
+  --custom-output-len 4096 \
+  --num-prompts 1024 \
+  --max-concurrency 32 \
+  --model Qwen/Qwen3.5-27B \
+  --temperature 0.0
+```
+
+<!-- <div align="center">
   <img src="assets/dflash_results.png" width="100%">
-</div>
+</div> -->
 
 ## **Acknowledgement**
 
-Huge thanks to [@dcw02](https://github.com/dcw02), [@gongy](https://github.com/gongy), and the other folks at [@modal-labs](https://github.com/modal-labs) for the fast, high-quality support in bringing DFlash into SGLang—making it possible to truly accelerate LLM serving in real-world deployments.
+Huge thanks to [@dcw02](https://github.com/dcw02), [@gongy](https://github.com/gongy), and the team at [@modal-labs](https://github.com/modal-labs) for their fast, high-quality support in bringing DFlash to SGLang. And huge thanks as well to [@benchislett](https://github.com/benchislett) at NVIDIA for his work in bringing DFlash to vLLM and helping make it available to the broader serving community.
 
 ## **Citation**
 If you find DFlash useful, please cite our work. To share feedback on DFlash or request new model support, please fill out this form: [DFlash Feedback](https://forms.gle/4YNwfqb4nJdqn6hq9).
