@@ -30,16 +30,17 @@ https://github.com/user-attachments/assets/5b29cabb-eb95-44c9-8ffe-367c0758de8c
 
 ## 📦 Installation
 
+Use a separate virtual environment for each to avoid conflict.
+
 | Backend | Install command |
 |---|---|
 | **Transformers** | `uv pip install -e .` |
 | **SGLang** | `uv pip install -e ".[sglang]"` |
-| **vLLM** | `uv pip install -e ".[vllm]"` then upgrade vllm to nightly (see below) |
+| **vLLM** | See below |
 
-> **Note:** Use a separate virtual environment for each.
-
-**vLLM nightly:** DFlash support is only available in the nightly build. After installing, upgrade vllm:
+**vLLM:** DFlash support requires the nightly build:
 ```bash
+uv pip install -e ".[vllm]"
 uv pip install -U vllm --torch-backend=auto --extra-index-url https://wheels.vllm.ai/nightly
 ```
 
