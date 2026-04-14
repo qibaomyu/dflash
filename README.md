@@ -20,8 +20,8 @@ https://github.com/user-attachments/assets/5b29cabb-eb95-44c9-8ffe-367c0758de8c
 | Qwen3-Coder-30B-A3B | [z-lab/Qwen3-Coder-30B-A3B-DFlash](https://huggingface.co/z-lab/Qwen3-Coder-30B-A3B-DFlash) |
 | gpt-oss-20b | [z-lab/gpt-oss-20b-DFlash](https://huggingface.co/z-lab/gpt-oss-20b-DFlash) |
 | gpt-oss-120b | [z-lab/gpt-oss-120b-DFlash](https://huggingface.co/z-lab/gpt-oss-120b-DFlash) |
-| Qwen3-4B (Non-thinking) | [z-lab/Qwen3-4B-DFlash-b16](https://huggingface.co/z-lab/Qwen3-4B-DFlash-b16) |
-| Qwen3-8B (Non-thinking) | [z-lab/Qwen3-8B-DFlash-b16](https://huggingface.co/z-lab/Qwen3-8B-DFlash-b16) |
+| Qwen3-4B (non-thinking) | [z-lab/Qwen3-4B-DFlash-b16](https://huggingface.co/z-lab/Qwen3-4B-DFlash-b16) |
+| Qwen3-8B (non-thinking) | [z-lab/Qwen3-8B-DFlash-b16](https://huggingface.co/z-lab/Qwen3-8B-DFlash-b16) |
 | Llama-3.1-8B-Instruct | [z-lab/LLaMA3.1-8B-Instruct-DFlash-UltraChat](https://huggingface.co/z-lab/LLaMA3.1-8B-Instruct-DFlash-UltraChat) |
 | Qwen3.5-122B-A10B | Coming soon |
 | Qwen3.5-397B-A17B | Coming soon |
@@ -35,9 +35,10 @@ Use a separate virtual environment for each to avoid conflict.
 
 | Backend | Install command |
 |---|---|
-| **Transformers** | `uv pip install -e .` |
+| **Transformers** | `uv pip install -e ".[transformers]"` |
 | **SGLang** | `uv pip install -e ".[sglang]"` |
 | **vLLM** | See below |
+| **MLX** (Apple Silicon) | `pip install -e ".[mlx]"` |
 
 **vLLM:** DFlash support requires the nightly build:
 ```bash
@@ -97,6 +98,25 @@ output = draft.spec_generate(input_ids=input_ids, max_new_tokens=2048, temperatu
 print(tokenizer.decode(output[0], skip_special_tokens=False))
 ```
 
+### MLX (Apple Silicon)
+
+There have been many great community DFlash implementations on MLX; we provide a simple and efficient one here, tested on an Apple M5 Pro with Qwen3 and Qwen3.5 models.
+
+```python
+from dflash.model_mlx import load, load_draft, stream_generate
+
+model, tokenizer = load("Qwen/Qwen3.5-4B")
+draft = load_draft("z-lab/Qwen3.5-4B-DFlash")
+
+messages = [{"role": "user", "content": "How many positive whole-number divisors does 196 have?"}]
+prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, enable_thinking=True)
+tps = 0.0
+for r in stream_generate(model, draft, tokenizer, prompt, block_size=16, max_tokens=2048, temperature=0.6):
+    print(r.text, end="", flush=True)
+    tps = r.generation_tps
+print(f"\nThroughput: {tps:.2f} tok/s")
+```
+
 ## 📊 Evaluation
 
 All benchmarks share the same datasets (gsm8k, math500, humaneval, mbpp, mt-bench). Datasets are automatically downloaded and cached as JSONL in `cache/` on first run.
@@ -120,6 +140,13 @@ python -m dflash.benchmark --backend sglang \
 torchrun --nproc_per_node=8 -m dflash.benchmark --backend transformers \
     --model Qwen/Qwen3-8B --draft-model z-lab/Qwen3-8B-DFlash-b16 \
     --dataset gsm8k --max-samples 128
+```
+
+**MLX**:
+```bash
+python -m dflash.benchmark --backend mlx \
+    --model Qwen/Qwen3.5-4B --draft-model z-lab/Qwen3.5-4B-DFlash \
+    --dataset gsm8k --max-samples 128 --enable-thinking
 ```
 
 ## Acknowledgement
