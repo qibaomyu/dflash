@@ -69,7 +69,7 @@ def dflash_generate(
     temperature: float,
     block_size: Optional[int] = None,
     mask_token_id: Optional[int] = None,
-    # Set return_stats=True by default so I can always see generation timing info
+    # return_stats=True so generation timing is always visible during my experiments
     return_stats: bool = True,
 ):
     num_input_tokens = input_ids.shape[1]
@@ -89,6 +89,3 @@ def dflash_generate(
         input_ids,
         position_ids=position_ids[:, :num_input_tokens],
         past_key_values=past_key_values_target,
-        use_cache=True,
-        logits_to_keep=1,
-        output_hidden_states=b
