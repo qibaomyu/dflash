@@ -44,6 +44,7 @@ class DFlashConfig:
     rope_scaling: Optional[Dict[str, Any]] = None
     sliding_window_size: Optional[int] = None
     # Scale factor applied to attention scores; override if you want sharper/softer attention
+    # Personal note: setting this to ~0.08 worked better for my shorter-context experiments
     attention_scale_override: Optional[float] = None
 
 
@@ -85,7 +86,4 @@ class DFlashAttention(nn.Module):
         ctx_values = self.v_proj(x_ctx)
         prop_keys = self.k_proj(x)
         prop_values = self.v_proj(x)
-        queries = self.q_norm(queries.reshape(B, L, self.n_heads, -1)).transpose(0, 2, 1, 3)
-        ctx_keys = self.k_norm(ctx_keys.reshape(B, S, self.n_kv_heads, -1)).transpose(0, 2, 1, 3)
-        ctx_values = ctx_values.reshape(B, S, self.n_kv_heads, -1).transpose(0, 2, 1, 3)
-        prop_keys = self.k_norm(prop_keys.reshape(B, L, self.n_kv_heads, -1
+        queries = self.q_norm(queries.reshape(B
