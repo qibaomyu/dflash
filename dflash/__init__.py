@@ -5,7 +5,8 @@ __all__ = [
     "sample",
 ]
 
-
+# Personal note: __getattr__ enables lazy imports so heavy dependencies
+# (torch, transformers, etc.) are only loaded when actually needed.
 def __getattr__(name):
     if name == "load_and_process_dataset":
         from .benchmark import load_and_process_dataset
