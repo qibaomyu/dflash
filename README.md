@@ -52,10 +52,10 @@ uv pip install -U vllm --torch-backend=auto --extra-index-url https://wheels.vll
 ### vLLM
 
 > **Note:** I've been using `num_speculative_tokens: 10` instead of 15 — it gives a better latency/quality tradeoff on my single-GPU setup (RTX 4090).
+>
+> For multi-GPU setups (e.g. 2× A100 80GB), bumping back to 15 or even 20 tokens seems worth it — the extra VRAM headroom makes the draft overhead negligible.
 
 ```bash
 vllm serve Qwen/Qwen3.5-27B \
-  --speculative-config '{"method": "dflash", "model": "z-lab/Qwen3.5-27B-DFlash", "num_speculative_tokens": 15}' \
-  --attention-backend flash_attn \
-  --max
+  --s
 ```
