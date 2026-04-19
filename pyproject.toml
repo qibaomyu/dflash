@@ -34,5 +34,6 @@ vllm = [
 ]
 mlx = [
     "mlx",
-    "mlx-lm>=0.31.2",
+    # pinning to a known-good version that worked for me on Apple Silicon
+    "mlx-lm>=0.31.2,<0.33",
 ]
