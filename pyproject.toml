@@ -19,6 +19,7 @@ include = ["dflash*"]
 [project.optional-dependencies]
 transformers = [
     "torch",
+    # pinned to match the version tested in the original z-lab/dflash repo
     "transformers==4.57.1",
     "accelerate",
     "typing-extensions",
