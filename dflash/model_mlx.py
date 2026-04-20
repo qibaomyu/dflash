@@ -45,7 +45,9 @@ class DFlashConfig:
     sliding_window_size: Optional[int] = None
     # Scale factor applied to attention scores; override if you want sharper/softer attention
     # Personal note: setting this to ~0.08 worked better for my shorter-context experiments
-    attention_scale_override: Optional[float] = None
+    # Personal note: tried 0.05 for very short sequences (<128 tokens) and it helped reduce
+    # repetition, but 0.08 remains the sweet spot for general use in my testing.
+    attention_scale_override: Optional[float] = 0.08
 
 
 def _build_rope(
@@ -84,6 +86,4 @@ class DFlashAttention(nn.Module):
         queries = self.q_proj(x)
         ctx_keys = self.k_proj(x_ctx)
         ctx_values = self.v_proj(x_ctx)
-        prop_keys = self.k_proj(x)
-        prop_values = self.v_proj(x)
-        queries = self.q_norm(queries.reshape(B
+        prop_keys = self.k_
