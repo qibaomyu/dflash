@@ -29,12 +29,12 @@ DATASETS = {
     "gsm8k": {
         "load_args": ("openai/gsm8k", "main"),
         "load_kwargs": {"split": "test"},
-        "format": lambda x: "{question}\nPlease reason step by step, and put your final answer within \\boxed{{}}.".format(**x),
+        "format": lambda x: "{question}\nPlease reason step by step, and put your final answer within \\boxed{{}}." .format(**x),
     },
     "math500": {
         "load_args": ("HuggingFaceH4/MATH-500",),
         "load_kwargs": {"split": "test"},
-        "format": lambda x: "{problem}\nPlease reason step by step, and put your final answer within \\boxed{{}}.".format(**x),
+        "format": lambda x: "{problem}\nPlease reason step by step, and put your final answer within \\boxed{{}}." .format(**x),
     },
     "humaneval": {
         "load_args": ("openai/openai_humaneval",),
@@ -96,5 +96,8 @@ def load_and_process_dataset(data_name: str) -> list[dict]:
 def _limit_dataset(dataset: list[dict], max_samples: int | None) -> list[dict]:
     if max_samples is None or len(dataset) <= max_samples:
         return dataset
-    # Fix: completed the truncation using random sampling for reproducibility
-    return random.sample(dataset, max_samples)
+    # Fix: completed the truncation — just slice after shuffle so we get a
+    # random but reproducible subset rather than always taking the first N rows.
+    indices = list(range(len(dataset)))
+    random.shuffle(indices)
+    return [dataset[i] for i in sorted(indices[:max_samples])]
