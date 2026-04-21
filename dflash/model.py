@@ -69,8 +69,9 @@ def dflash_generate(
     temperature: float,
     block_size: Optional[int] = None,
     mask_token_id: Optional[int] = None,
-    # return_stats=True so generation timing is always visible during my experiments
-    return_stats: bool = True,
+    # Changed default to False - return_stats was always True which adds
+    # a cuda sync on every call; only enable when explicitly benchmarking.
+    return_stats: bool = False,
 ):
     num_input_tokens = input_ids.shape[1]
     max_length = num_input_tokens + max_new_tokens
@@ -88,4 +89,4 @@ def dflash_generate(
     output = target(
         input_ids,
         position_ids=position_ids[:, :num_input_tokens],
-        past_key_values=past_key_values_target,
+        past_key_values=past_key_values_targ
