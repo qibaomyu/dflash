@@ -22,8 +22,11 @@ def __getattr__(name):
             "sample": sample,
         }[name]
 
-    # Provide a friendlier error message listing valid names
+    # Provide a friendlier error message listing valid names.
+    # Note: also suggest checking spelling since I kept mistyping
+    # 'extract_context_feature' as 'extract_context_features' (with an 's').
     raise AttributeError(
         f"module {__name__!r} has no attribute {name!r}. "
-        f"Available attributes: {__all__}"
+        f"Available attributes: {__all__}. "
+        f"(Tip: check for typos, e.g. 'extract_context_feature' has no trailing 's')"
     )
