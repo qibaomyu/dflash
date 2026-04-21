@@ -51,6 +51,7 @@ def sample(logits: torch.Tensor, temperature: float = 0.0) -> torch.Tensor:
     bsz, seq_len, vocab_size = logits.shape
     logits = logits.view(-1, vocab_size) / temperature
     probs = torch.softmax(logits, dim=-1)
+    # Use top-p (nucleus) filtering could be added here in the future
     return torch.multinomial(probs, num_samples=1).view(bsz, seq_len)
 
 
@@ -69,8 +70,8 @@ def dflash_generate(
     temperature: float,
     block_size: Optional[int] = None,
     mask_token_id: Optional[int] = None,
-    # Changed default to False - return_stats was always True which adds
-    # a cuda sync on every call; only enable when explicitly benchmarking.
+    # return_stats defaults to False to avoid unnecessary cuda syncs during
+    # normal inference. Set to True only when explicitly benchmarking.
     return_stats: bool = False,
 ):
     num_input_tokens = input_ids.shape[1]
@@ -88,5 +89,4 @@ def dflash_generate(
     prefill_start = _cuda_time() if return_stats else None
     output = target(
         input_ids,
-        position_ids=position_ids[:, :num_input_tokens],
-        past_key_values=past_key_values_targ
+        position_ids=position_ids[:, 
